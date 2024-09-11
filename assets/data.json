@@ -1,0 +1,47 @@
+{
+  "name": "张三",
+  "age": 30,
+  "gender": "男",
+  "email": "zhangsan@example.com",
+  "phone": "13812345678",
+  "address": [
+    {
+      "province": "广东省",
+      "city": "深圳市",
+      "district": "南山区",
+      "detail": "科技园大厦A座501室",
+      "postalCode": "518000"
+    },
+    {
+      "province": "北京市",
+      "city": "海淀区",
+      "district": "中关村",
+      "detail": "清华大学",
+      "postalCode": "100084"
+    }
+  ],
+  "interests": ["编程", "阅读", "旅行"],
+  "education": {
+    "school": "清华大学",
+    "degree": "本科",
+    "major": "计算机科学"
+  },
+  "workExperience": [
+    {
+      "company": "腾讯",
+      "position": "软件工程师",
+      "startDate": "2020-01-01",
+      "endDate": "2023-12-31"
+    }
+  ],
+  "skills": {
+    "programmingLanguages": ["Python", "Java", "JavaScript"],
+    "tools": ["Git", "Docker", "Kubernetes"],
+    "frameworks": ["React", "Vue", "Flutter"]
+  },
+  "socialMedia": {
+    "wechat": "zhangsan123",
+    "weibo": "zhangsan_weibo",
+    "github": "zhangsan-github"
+  }
+}
