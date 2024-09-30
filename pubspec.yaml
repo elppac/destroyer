@@ -42,6 +42,8 @@ dependencies:
   mobx_codegen: ^2.6.1
   get: ^4.6.6
   expressions: ^0.2.5+2
+  image_picker: ^1.1.2
+  tdesign_flutter: ^0.1.6
 
 dev_dependencies:
   flutter_test:

@@ -23,7 +23,10 @@ void setValue(Map<String, dynamic> data, List<String> path, dynamic value) {
   }
 }
 
-T? getValue<T>(Object? object, List<String> path, {T? defaultValue}) {
+void setIn(Map<String, dynamic> data, List<String> path, dynamic value) =>
+    setValue(data, path, value);
+
+T? getValue<T>(Object? object, List<String> path, Map map, {T? defaultValue}) {
   if (object == null) return defaultValue;
 
   dynamic value = object;
@@ -37,3 +40,6 @@ T? getValue<T>(Object? object, List<String> path, {T? defaultValue}) {
 
   return value as T;
 }
+
+T? getIn<T>(Object? object, List<String> path, {T? defaultValue}) =>
+    getValue(object, path, {defaultValue: defaultValue});

@@ -1,6 +1,7 @@
 import 'package:destroyer/packages/getx.dart';
 import 'package:destroyer/packages/mobx.dart';
 import 'package:destroyer/packages/provider.dart';
+import 'package:destroyer/packages/post.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -86,6 +87,21 @@ class HomeComponent extends StatelessWidget {
                   );
                 },
                 child: const Text('Mobx'),
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  minimumSize: const Size(double.infinity, 48), // 高度可以自定义
+                ),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const Post(),
+                    ),
+                  );
+                },
+                child: const Text('Form'),
               ),
             ],
           ),

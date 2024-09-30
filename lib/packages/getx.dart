@@ -219,6 +219,7 @@ class ExtendMobxComponent extends StatelessWidget {
     final CounterController counterController = Get.find();
     print('render ExtendMobxComponent');
 
+
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
