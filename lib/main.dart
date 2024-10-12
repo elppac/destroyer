@@ -1,7 +1,9 @@
+import 'package:destroyer/components/matrix_voice/matrix_recorder.dart';
 import 'package:destroyer/packages/getx.dart';
 import 'package:destroyer/packages/mobx.dart';
 import 'package:destroyer/packages/provider.dart';
 import 'package:destroyer/packages/post.dart';
+import 'package:destroyer/packages/upload.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -103,6 +105,24 @@ class HomeComponent extends StatelessWidget {
                 },
                 child: const Text('Form'),
               ),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  minimumSize: const Size(double.infinity, 48), // 高度可以自定义
+                ),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const Upload(
+                        title: 'Upload',
+                      ),
+                    ),
+                  );
+                },
+                child: const Text('Upload'),
+              ),
+              // const MatrixRecorder(),
             ],
           ),
         ));

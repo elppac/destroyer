@@ -5,7 +5,10 @@ import '../packages/utils.dart';
 import 'form_component.dart';
 
 bool isJsonMap(dynamic data) {
-  return data.runtimeType.toString() == '_JsonMap';
+  String type = data.runtimeType.toString();
+  return type == '_JsonMap' ||
+      type == 'IdentityMap<String, dynamic>' ||
+      type == '_Map<String, dynamic>';
 }
 
 toRx(dynamic data) {
@@ -21,7 +24,7 @@ class FormStore extends GetxController {
     data[key] = value;
   }
 
-  void createField(String pageId, String fieldId, dynamic fieldData) {
+  void createField(String fieldId, dynamic fieldData) {
     data[fieldId] ??= toRx(fieldData);
   }
 
@@ -48,6 +51,22 @@ class FormStore extends GetxController {
       return null;
     }
   }
+
+  getValues() {
+    Map<String, dynamic> values = {};
+    data.forEach((key, value) {
+      values[key] = value['value'];
+    });
+    return values;
+  }
+
+  setValues(Map<String, dynamic> values) {
+    values.forEach((key, value) {
+      if (data[key] != null) {
+        data[key]['value'] = value;
+      }
+    });
+  }
 }
 
 FormStore useFormStore() {
@@ -57,16 +76,20 @@ FormStore useFormStore() {
 class MatrixFormContext with ChangeNotifier {
   final Map<String, FormComponentBuilder> _components;
   final List<Map<String, dynamic>> _schema;
+  final Map<String, dynamic>? _config;
   final GlobalKey<FormState> formInstance = GlobalKey<FormState>();
 
   MatrixFormContext(
       {required Map<String, FormComponentBuilder> components,
-      required List<Map<String, dynamic>> schema})
+      required List<Map<String, dynamic>> schema,
+      Map<String, dynamic>? config})
       : _components = components,
-        _schema = schema;
+        _schema = schema,
+        _config = config;
 
   Map<String, FormComponentBuilder> get components => _components;
   List<Map<String, dynamic>> get schema => _schema;
+  Map<String, dynamic>? get config => _config;
   // Key get formInstance => _formInstance;
 }
 
@@ -99,15 +122,14 @@ class _Form extends State<MatrixForm> {
           Column(
             children: ctx.schema.map((i) {
               String componentType = i['component'];
-              return ctx.components[componentType]!(i)(context);
+              useFormStore().createField(i['name'], i);
+              if (ctx.components[componentType] != null) {
+                return ctx.components[componentType]!(i)(context);
+              } else {
+                return Container(child: Text('未实现的组件 ${componentType}'));
+              }
             }).toList(),
           ),
-          TextButton(
-              onPressed: () {
-                MatrixFormContext ctx = context.read<MatrixFormContext>();
-                print(ctx.formInstance.currentState?.validate());
-              },
-              child: const Text('Save 2'))
         ],
       ),
     );

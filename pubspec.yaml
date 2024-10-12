@@ -44,6 +44,15 @@ dependencies:
   expressions: ^0.2.5+2
   image_picker: ^1.1.2
   tdesign_flutter: ^0.1.6
+  flutter_picker_plus: ^1.3.0
+  video_player: ^2.9.2
+  mime: ^1.0.6
+  permission_handler: ^11.3.1
+  flutter_sound: ^9.16.3
+  audio_session: ^0.1.21
+  flutter_sound_platform_interface: ^9.16.3
+  dio: ^5.7.0
+  http: ^1.2.2
 
 dev_dependencies:
   flutter_test:
