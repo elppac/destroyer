@@ -17,6 +17,8 @@ class MatrixImagePicker extends StatefulWidget {
   final bool multiple;
   final int limit;
   final TDTagSize size;
+  final double? height;
+  final double? borderRadius;
   const MatrixImagePicker(
       {super.key,
       this.initialValue,
@@ -25,7 +27,9 @@ class MatrixImagePicker extends StatefulWidget {
       this.additionInfo,
       this.limit = 9,
       this.size = TDTagSize.extraLarge,
-      this.multiple = false});
+      this.multiple = false,
+      this.height,
+      this.borderRadius});
 
   @override
   State<StatefulWidget> createState() => _MatrixImagePicker();
@@ -56,7 +60,7 @@ class _MatrixImagePicker extends State<MatrixImagePicker> {
     final dio = Dio();
 
     var generateResponse =
-        await dio.post('http://127.0.0.1:7001/generatePresignedUrl',
+        await dio.post('http://192.168.127.138:7001/generatePresignedUrl',
             data: jsonEncode({'fileName': pickedFile.name}),
             options: Options(headers: {
               HttpHeaders.contentTypeHeader: "application/json",
@@ -65,16 +69,17 @@ class _MatrixImagePicker extends State<MatrixImagePicker> {
 
     // 读取文件为字节流
     Uint8List fileBytes = await pickedFile.readAsBytes();
+    var decodedImage = await decodeImageFromList(fileBytes);
     String fileName = pickedFile.name; // 通过 XFile 获取文件名
 
     // 构建 FormData
-    FormData formData = FormData.fromMap({
-      "fileInfo": MultipartFile.fromBytes(fileBytes, filename: fileName),
-    });
+    // FormData formData = FormData.fromMap({
+    //   "fileInfo": MultipartFile.fromBytes(fileBytes, filename: fileName),
+    // });
 
     final uploadDio = Dio();
-    uploadDio.options.connectTimeout = Duration(seconds: 10);
-    uploadDio.options.sendTimeout = Duration(seconds: 10);
+    uploadDio.options.connectTimeout = const Duration(seconds: 10);
+    uploadDio.options.sendTimeout = const Duration(seconds: 10);
     // var fileData = MultipartFile.fromBytes(fileBytes);
     // FormData body = FormData.fromMap({});
     // body.files.add(MapEntry("image", fileData));
@@ -83,7 +88,7 @@ class _MatrixImagePicker extends State<MatrixImagePicker> {
             // data: FormData.fromMap({
             //   'image': fileData,
             // }),
-            data: formData,
+            data: fileBytes,
             options: Options(headers: {
               HttpHeaders.contentTypeHeader: pickedFile.mimeType,
             }));
@@ -91,18 +96,66 @@ class _MatrixImagePicker extends State<MatrixImagePicker> {
     setState(() {
       value = [
         {
-          "url": uploadResponse.data['data']['url'],
-          "fileCode": generateResponseData["data"]['fileCode'],
-          "fileName": fileName,
+          "url": generateResponseData['data']['fileUrl'],
+          "uid": generateResponseData["data"]['fileCode'],
+          "name": fileName,
+          'size': fileBytes.length,
+          'width': decodedImage.width,
+          'height': decodedImage.height
         }
       ];
       widget.onChanged!(value!);
     });
   }
 
+  Future<ImageSource> showAsyncDialog(BuildContext context) async {
+    return await showDialog(
+      context: context,
+      barrierDismissible: true, // 用户可通过点击背景关闭
+      builder: (BuildContext context) {
+        return AlertDialog(
+            content: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              IconButton(
+                icon: const Icon(
+                  Icons.image,
+                  size: 56,
+                ),
+                onPressed: () {
+                  Navigator.pop(context, ImageSource.gallery);
+                  // snapshot.connectionState = ConnectionState.done;
+                },
+                tooltip: '相册',
+              ),
+              IconButton(
+                icon: const Icon(
+                  Icons.camera_alt,
+                  size: 56,
+                ),
+                onPressed: () {
+                  Navigator.pop(context, ImageSource.camera);
+                  // snapshot.connectionState = ConnectionState.done;
+                },
+                tooltip: '相机',
+              ),
+            ],
+          ),
+        ));
+      },
+    );
+  }
+
   Future<void> _pickImage() async {
     final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    ImageSource? imageSource =
+        kIsWeb ? ImageSource.gallery : await showAsyncDialog(context);
+    if (imageSource == null) {
+      return;
+    }
+    final pickedFile = await picker.pickImage(source: imageSource);
 
     if (pickedFile != null) {
       // 处理选中的图片
@@ -126,22 +179,24 @@ class _MatrixImagePicker extends State<MatrixImagePicker> {
       child: Container(
         decoration: BoxDecoration(
             color: Colors.grey[200],
-            borderRadius: BorderRadius.circular(theme.radiusDefault)),
-        margin: const EdgeInsets.symmetric(horizontal: 16)
-            .add(const EdgeInsets.only(top: 20.0)),
+            borderRadius: BorderRadius.circular(
+                widget.borderRadius ?? theme.radiusExtraLarge)),
         width: double.infinity,
-        height: 100, // 调整高度
-        child: Center(
-          child: value == null
-              ? const Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.add),
-                    Text('请上传游戏主页截图'),
-                  ],
-                )
-              : _previewImages(),
-        ),
+        height: widget.height ?? 144, // 调整高度
+        child: value == null
+            ? Center(
+                child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.camera_alt_sharp),
+                  Visibility(
+                      visible: widget.title != '', child: Text(widget.title))
+                ],
+              ))
+            : ClipRRect(
+                borderRadius: BorderRadius.circular(
+                    widget.borderRadius ?? theme.radiusExtraLarge),
+                child: _previewImages()),
       ),
     );
   }
@@ -154,17 +209,23 @@ class _MatrixImagePicker extends State<MatrixImagePicker> {
 
     int index = 0;
     var item = value![index];
-
+    bool isNetwork = kIsWeb;
+    if (item.runtimeType != XFile) {
+      isNetwork = true;
+    }
     var url = item.runtimeType == XFile ? item.path : item["url"];
 
     final String? mime = lookupMimeType(url);
     return Semantics(
       label: 'image_picker_preview',
-      child: kIsWeb
-          ? Image.network(url)
+      child: isNetwork
+          ? Image.network(
+              url,
+              fit: BoxFit.fitWidth,
+            )
           : (mime == null || mime.startsWith('image/'))
               ? Image.file(
-                  File(value![index].path),
+                  File(url),
                   errorBuilder: (BuildContext context, Object error,
                       StackTrace? stackTrace) {
                     return const Center(

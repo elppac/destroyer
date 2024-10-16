@@ -2,6 +2,7 @@ import 'package:destroyer/components/matrix_tag_picker/show_matrix_tag_picker.da
 import 'package:flutter/material.dart';
 import 'package:tdesign_flutter/tdesign_flutter.dart';
 import '../matrix_select/build_select.dart';
+import 'tag_picker.dart';
 
 class MatrixTagPicker extends StatefulWidget {
   /// 输入文本变化时回调
@@ -13,6 +14,12 @@ class MatrixTagPicker extends StatefulWidget {
   final bool multiple;
   final int limit;
   final TDTagSize size;
+  final bool showLeft;
+  final bool showRight;
+  final Widget? left;
+  final Widget? right;
+  final TabPickerCheckValue? checkValue;
+  final int? crossAxisCount;
   const MatrixTagPicker(
       {super.key,
       this.initialValue,
@@ -22,7 +29,13 @@ class MatrixTagPicker extends StatefulWidget {
       required this.options,
       this.limit = 9,
       this.size = TDTagSize.extraLarge,
-      this.multiple = false});
+      this.multiple = false,
+      this.showLeft = true,
+      this.showRight = true,
+      this.left,
+      this.right,
+      this.checkValue,
+      this.crossAxisCount});
 
   @override
   State<StatefulWidget> createState() => _MatrixTagPicker();
@@ -48,17 +61,30 @@ class _MatrixTagPicker extends State<MatrixTagPicker> {
       });
     }
   }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        showMatrixTagPicker(context, title: widget.title, onConfirm: (data) {
-          setState(() {
-            value = data;
-            widget.onChanged!(data);
-          });
-          Navigator.of(context).pop();
-        }, options: widget.options, initial: widget.initialValue);
+        showMatrixTagPicker(
+          context,
+          title: widget.title,
+          options: widget.options,
+          initial: widget.initialValue,
+          showLeft: widget.showLeft,
+          showRight: widget.showRight,
+          left: widget.left,
+          right: widget.right,
+          checkValue: widget.checkValue,
+          crossAxisCount: widget.crossAxisCount,
+          onConfirm: (data) {
+            setState(() {
+              value = data;
+              widget.onChanged!(data);
+            });
+            Navigator.of(context).pop();
+          },
+        );
       },
       child: buildSelect(
           context,

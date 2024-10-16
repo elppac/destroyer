@@ -23,25 +23,28 @@ class _Post extends State<Post> {
     Map<String, dynamic> data = {
       'userName': 'test',
       'description': '123',
+      'price': [2],
       'type': '2',
       'orderTime': [10, 18],
       'skillLevel': '1',
       'tags': ['8'],
-      'upload': [
+      'images': [
         {
           'url':
-              'http://127.0.0.1:7001/upload-file/132fcfcc-0e2a-4484-98d8-bf297bae4b30/test.jpeg',
-          'fileCode': '132fcfcc-0e2a-4484-98d8-bf297bae4b30',
-          'fileName': 'test.jpeg',
-          'size': 10000
+              'http://192.168.127.138:7001/upload-file/fe5aba7b-25b5-4365-8061-7658406ded7d/3a283bb5-a890-42bf-a523-ba39ba6deafa3369984849552634810.jpg',
+          'uid': 'fe5aba7b-25b5-4365-8061-7658406ded7d',
+          'name': '3a283bb5-a890-42bf-a523-ba39ba6deafa3369984849552634810.jpg',
+          'size': 2792374,
+          'width': 3648,
+          'height': 2736
         }
       ],
       'voice': [
         {
           'url':
-              'http://127.0.0.1:7001/upload-file/d0d923ce-6cfb-43cf-a9c2-25fccd150733/voice.mp4',
-          'fileCode': 'd0d923ce-6cfb-43cf-a9c2-25fccd150733',
-          'fileName': 'voice.mp4',
+              'http://192.168.127.138:7001/upload-file/da52f7a0-d4f8-481e-a2ed-03f66af91814/voice.mp4',
+          'uid': 'da52f7a0-d4f8-481e-a2ed-03f66af91814',
+          'name': 'voice.mp4',
           'size': 3.602
         }
       ]
@@ -130,62 +133,50 @@ class _Post extends State<Post> {
         // "max": 15
       },
     ];
-
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Provider Example'),
-      ),
-      body: SingleChildScrollView(
-        child: Provider<MatrixFormContext>(
-          create: (_) => MatrixFormContext(
-              components: {
-                ...FormComponent.components,
-                ...GameFormComponent.components
-              },
-              schema: formData,
-              config: {
-                'tieredPrice': [
-                  {"label": "Level 2", "value": 2},
-                  {"label": "Level 3", "value": 3},
-                  {"label": "Level 4", "value": 4},
-                  {"label": "Level 5", "value": 5},
-                  {"label": "Level 6", "value": 6},
-                  {"label": "Level 7", "value": 7}
-                ],
-                'maxPrice': 4,
-                'categoryScreenshot': '',
-              }),
-          builder: (context, child) {
-            return Column(children: [
-              const MatrixForm(),
-              const SizedBox(
-                height: 20,
-              ),
-              TextButton(
-                  onPressed: () {
+    return Provider<MatrixFormContext>(
+      create: (_) => MatrixFormContext(
+          components: {
+            ...FormComponent.components,
+            ...GameFormComponent.components
+          },
+          schema: formData,
+          config: {
+            'tieredPrice': [
+              {"label": "Level 2", "value": 2, 'description': "￥0"},
+              {"label": "Level 3", "value": 3, 'description': "￥100"},
+              {"label": "Level 4", "value": 4, 'description': "￥1000"},
+              {"label": "Level 5", "value": 5, 'description': "￥10000"},
+              {"label": "Level 6", "value": 6, 'description': "￥100000"},
+              {"label": "Level 7", "value": 7, 'description': "￥1000000"}
+            ],
+            'maxPrice': 4,
+            'categoryScreenshot': '',
+          }),
+      builder: (context, child) {
+        return Scaffold(
+            appBar: AppBar(
+              title: const Text('Post Example'),
+            ),
+            body: SingleChildScrollView(
+              child: Container(child: const MatrixForm()),
+            ),
+            bottomNavigationBar: Container(
+                margin: EdgeInsets.all(16),
+                child: TDButton(
+                  text: 'Submit',
+                  size: TDButtonSize.large,
+                  type: TDButtonType.fill,
+                  theme: TDButtonTheme.primary,
+                  isBlock: true,
+                  onTap: () {
                     MatrixFormContext ctx = context.read<MatrixFormContext>();
                     print(ctx.formInstance.currentState?.validate());
                     if (ctx.formInstance.currentState?.validate() == true) {
                       print('getValues: ${useFormStore().getValues()}');
                     }
                   },
-                  child: const Text('Save'))
-            ]);
-          },
-        ),
-      ),
-      // Form(
-      //   child: Column(
-      //     children: formData.map((i) {
-      //       String componentType = i['component'];
-      //       return FormComponent.components[componentType]!(i)(context);
-      //     }).toList(),
-      //   ),
-      // ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {},
-        child: const Icon(Icons.add),
-      ),
+                )));
+      },
     );
   }
 }

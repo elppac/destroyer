@@ -211,20 +211,25 @@ class _MatrixRecorderState extends State<MatrixRecorder> {
     var generateResponseData = generateResponse.data;
 
     // 读取文件为字节流
-    MultipartFile file;
+    // MultipartFile file;
     String contentType = 'audio/mp4';
+    Uint8List fileBytes;
+
     if (kIsWeb) {
       final response = await http.get(Uri.parse(filePath));
-      file = MultipartFile.fromBytes(response.bodyBytes, filename: fileName);
+      // file = MultipartFile.fromBytes(response.bodyBytes, filename: fileName);
       contentType = response.headers['content-type']!;
+      fileBytes = response.bodyBytes;
     } else {
-      file = MultipartFile.fromFileSync(filePath);
+      // file = MultipartFile.fromFileSync(filePath);
+      File file = File(filePath);
+      fileBytes = await file.readAsBytes();
     }
 
     // 构建 FormData
-    FormData formData = FormData.fromMap({
-      "fileInfo": file,
-    });
+    // FormData formData = FormData.fromMap({
+    //   "fileInfo": file,
+    // });
 
     final uploadDio = Dio();
     uploadDio.options.connectTimeout = Duration(seconds: 10);
@@ -232,16 +237,16 @@ class _MatrixRecorderState extends State<MatrixRecorder> {
 
     var uploadResponse =
         await uploadDio.post(generateResponseData["data"]['uploadUrl'],
-            data: formData,
+            data: fileBytes,
             options: Options(headers: {
               HttpHeaders.contentTypeHeader: contentType,
             }));
     setState(() {
       data = [
         {
-          "url": uploadResponse.data['data']['url'],
-          "fileCode": generateResponseData["data"]['fileCode'],
-          "fileName": fileName,
+          "url": generateResponseData['data']['fileUrl'],
+          "uid": generateResponseData["data"]['fileCode'],
+          "name": fileName,
           "size": _voiceDuration
         }
       ];

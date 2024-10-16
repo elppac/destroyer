@@ -27,6 +27,7 @@ Widget buildSelect(
               child: TDText(
                 title,
                 font: TDTheme.of(context).fontBodyLarge,
+                textColor: error == null || error == '' ? theme.grayColor14 : theme.errorColor6,
               ),
             ),
             Expanded(
